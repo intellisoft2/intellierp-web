@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IntelliERP · Intellisoft Technologies</title>
+<meta name="description" content="IntelliERP Municipal Edition: one cloud ERP for city finance, payroll, utilities, permits, taxes and resident services.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d3238'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='30' font-weight='800' text-anchor='middle' fill='%23e0b44c'%3EE%3C/text%3E%3C/svg%3E">
+<style>
+html,body{margin:0;height:100%;background:#f3f6f5;font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#18292e}
+#app{position:fixed;inset:0;width:100%;height:100%;border:0;display:block}
+#wait{position:fixed;inset:0;display:grid;place-items:center;text-align:center}
+#wait b{font-size:24px;letter-spacing:-.4px}#wait b span{color:#0f7470}
+.spin{width:30px;height:30px;border:3px solid #e3f1ef;border-top-color:#0f7470;border-radius:50%;animation:s 1s linear infinite;margin:0 auto 14px}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+#wait p{color:#5f7177;font-size:14px;margin:6px 0 0}#wait a{color:#0f7470}
+</style>
+</head>
+<body>
+<div id="wait"><div><div class="spin"></div><b>Intelli<span>ERP</span></b><p id="msg">Opening your workspace…</p></div></div>
+<iframe id="app" title="IntelliERP" allow="clipboard-write; geolocation; payment" hidden></iframe>
+<noscript><p style="padding:24px">IntelliERP needs JavaScript. Please enable it and reload.</p></noscript>
+<script>
+/* erp.intellisoft-tech.com hosts the IntelliERP web app (Google Apps Script) under Intellisoft's own domain.
+   deploy.sh writes the web app's /exec URL on the next line. */
+var EXEC = "https://script.google.com/macros/s/AKfycbyF3AV-DtK9dDCI8OcBiBE-qdFRcUR6Vz7S2r1p76QtB7Kxvwisnd_o_P5lBugSzXhk/exec";
+(function () {
+  var msg = document.getElementById('msg');
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(EXEC)) {
+    msg.innerHTML = 'The service is being set up. In the meantime, try the <a href="/demo/">live demo</a>.';
+    return;
+  }
+  var q = new URLSearchParams(location.search);
+  /* erp.intellisoft-tech.com/petersburg is the same as ?t=petersburg */
+  var seg = location.pathname.replace(/^\/+|\/+$/g, '').split('/')[0].toLowerCase();
+  if (seg && !q.get('t') && /^[a-z0-9-]{2,32}$/.test(seg) && seg !== 'index.html') q.set('t', seg);
+  var qs = q.toString();
+  var frame = document.getElementById('app');
+  frame.onload = function () { frame.hidden = false; document.getElementById('wait').hidden = true; };
+  frame.src = EXEC + (qs ? '?' + qs : '') + location.hash;
+  /* Keep one-time values (sign-in codes, invitation and payment tokens) out of the address bar and history. */
+  if (q.get('code') || q.get('invite') || q.get('session_id') || q.get('state')) {
+    var keep = q.get('t') ? '?t=' + encodeURIComponent(q.get('t')) + (q.get('portal') ? '&portal=1' : '') : '';
+    try { history.replaceState(null, '', '/' + keep); } catch (e) {}
+  }
+})();
+</script>
+</body>
+</html>
